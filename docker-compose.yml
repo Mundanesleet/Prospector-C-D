@@ -1,0 +1,26 @@
+# ==============================================================================
+# docker-compose.yml — Prospector C&D
+#
+# A diferencia de Como-arroz (que usa PostgreSQL en un contenedor aparte),
+# este proyecto usa SQLite: un solo archivo de base de datos dentro de la
+# carpeta instance/. Por eso aquí solo hay UN servicio por ahora — no hace
+# falta un contenedor de base de datos separado.
+#
+# IMPORTANTE: cuando agreguemos Celery + Redis (próximo paso), este archivo
+# va a crecer con dos servicios más: uno de Redis y uno del worker de Celery.
+# ==============================================================================
+
+services:
+  web:
+    build: .
+    command: python app.py
+    volumes:
+      - .:/app
+      # Este volumen es clave: aunque borres y recrees el contenedor, tu
+      # base de datos SQLite real (con los datos del cliente) sobrevive,
+      # porque vive en tu disco, no dentro del contenedor descartable.
+      - ./instance:/app/instance
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
